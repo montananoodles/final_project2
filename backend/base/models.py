@@ -33,20 +33,15 @@ class SellerProfile(models.Model):
         return f"{self.user_profile.user.username}'s seller profile"
 
 class Service(models.Model):
-    kind = models.TextField() 
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    desc = models.TextField()
+    title = models.CharField(max_length=100, blank=True, null=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    image = models.ImageField(upload_to='service_images/', default='default_image.jpg')  # Provide a default image path
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.kind
+        return self.title
 
-class PicsPosts(models.Model):
-    service_type = models.TextField() 
-    image = models.ImageField( null=True, blank=True)
-    description = models.TextField()
 
-    def __str__(self):
-        return self.description
 
 class Appointment(models.Model):
     seller = models.ForeignKey(SellerProfile, on_delete=models.CASCADE)

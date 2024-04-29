@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserProfile, CustomerProfile, SellerProfile, Service, PicsPosts, Appointment, NextAppointment
+from .models import UserProfile, CustomerProfile, SellerProfile, Service, Appointment, NextAppointment
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,11 +19,6 @@ class SellerProfileSerializer(serializers.ModelSerializer):
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = '__all__'
-
-class PicsPostsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PicsPosts
         fields = '__all__'
 
 class AppointmentSerializer(serializers.ModelSerializer):

@@ -6,11 +6,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import UserProfile, CustomerProfile, SellerProfile, Service, PicsPosts, Appointment, NextAppointment
+from .models import UserProfile, CustomerProfile, SellerProfile, Service, Appointment, NextAppointment
 from .Serializer import (
     UserProfileSerializer, CustomerProfileSerializer, SellerProfileSerializer,
-    ServiceSerializer, PicsPostsSerializer, AppointmentSerializer, NextAppointmentSerializer
+    ServiceSerializer, AppointmentSerializer, NextAppointmentSerializer
 )
+
+def test_view(request):
+    return render(request, 'test.html')
 
 @api_view(['GET'])
 def index(request):
@@ -77,35 +80,38 @@ class SellerProfileView(APIView):
             print('error', serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def add_service(request):
-    if request.method == 'POST':
+@api_view(['GET', 'POST'])
+def service_list(request):
+    if request.method == 'GET':
+        services = Service.objects.all()
+        serializer = ServiceSerializer(services, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
         serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class PicsPostsView(APIView):
-    def get(self, request):
-        res=[] 
-        for img in PicsPosts.objects.all(): 
-            res.append({"service_type":img.service_type,
-                "description":img.description,
-               "image":str( img.image)
-                }) 
-        return Response(res) 
+@api_view(['GET', 'PUT', 'DELETE'])
+def service_detail(request, pk):
+    try:
+        service = Service.objects.get(pk=pk)
+    except Service.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-    parser_classes = (MultiPartParser, FormParser)
-
-    def post(self, request, *args, **kwargs):
-        serializer = PicsPostsSerializer(data=request.data)
+    if request.method == 'GET':
+        serializer = ServiceSerializer(service)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = ServiceSerializer(service, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print('error', serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        service.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
         
 @api_view(['POST'])
 def add_appointment(request):
@@ -124,3 +130,4 @@ def add_nextappointment(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

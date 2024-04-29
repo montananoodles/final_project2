@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Services</title>
+</head>
+<body>
+    <h1>All Services</h1>
+    <ul>
+        {% for service in services %}
+            <li>
+                <h2>{{ service.title }}</h2>
+                <p><strong>Cost:</strong> ${{ service.cost }}</p>
+                {% if service.description %}
+                    <p><strong>Description:</strong> {{ service.description }}</p>
+                {% endif %}
+                {% if service.image %}
+                    <img src="{{ service.image.url }}" alt="{{ service.title }}">
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
