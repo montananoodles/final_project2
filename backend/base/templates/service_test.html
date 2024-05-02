@@ -67,6 +67,10 @@
                         title.textContent = service.title;
                         serviceCard.appendChild(title);
 
+                        const price = document.createElement('p'); // Create paragraph for displaying price
+                        price.textContent = `Price: $${service.cost}`; // Format the price
+                        serviceCard.appendChild(price);
+
                         const image = document.createElement('img');
                         image.src = `${MY_SERVER}/${service.image}`;
                         image.alt = service.title;
@@ -111,16 +115,20 @@
                 .catch(error => console.error('Error adding service:', error));
         });
 
-       // Function to edit a service
+        // Function to edit a service
 function editService(serviceId, title, cost, image, description) {
     let selectedImage; // Define selectedImage variable at the function level
 
     const serviceCard = document.querySelector(`[data-id="${serviceId}"]`);
 
-    // Create input fields for editing title and description
+    // Create input fields for editing title, cost, and description
     const titleInput = document.createElement('input');
     titleInput.type = 'text';
     titleInput.value = title;
+
+    const costInput = document.createElement('input');
+    costInput.type = 'number';
+    costInput.value = cost;
 
     const descriptionInput = document.createElement('textarea');
     descriptionInput.value = description;
@@ -147,13 +155,14 @@ function editService(serviceId, title, cost, image, description) {
     applyButton.textContent = 'Apply';
     applyButton.addEventListener('click', () => {
         const newTitle = titleInput.value.trim();
+        const newCost = parseFloat(costInput.value);
         const newDescription = descriptionInput.value.trim();
         if (newTitle !== '') {
             const formData = new FormData();
 
             // Append title, cost, and description
             formData.append('title', newTitle);
-            formData.append('cost', cost);
+            formData.append('cost', newCost);
             formData.append('description', newDescription);
 
             // Conditional check for selected image
@@ -190,16 +199,20 @@ function editService(serviceId, title, cost, image, description) {
         }
     });
 
-    // Replace title and description with input fields and add buttons
+    // Replace title, cost, and description with input fields and add buttons
     const titleElement = serviceCard.querySelector('h2');
+    const costElement = serviceCard.querySelector('p');
     const descriptionElement = serviceCard.querySelector('p');
     titleElement.textContent = '';
+    costElement.textContent = '';
     descriptionElement.textContent = '';
     titleElement.appendChild(titleInput);
+    costElement.appendChild(costInput);
     descriptionElement.appendChild(descriptionInput);
     serviceCard.appendChild(selectImageButton);
     serviceCard.appendChild(applyButton);
 }
+
 
         // Function to delete a service
         function deleteService(serviceId) {
