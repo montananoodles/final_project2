@@ -111,64 +111,95 @@
                 .catch(error => console.error('Error adding service:', error));
         });
 
-        // Function to edit a service
-        function editService(serviceId, title, cost, image, description) {
-            const serviceCard = document.querySelector(`[data-id="${serviceId}"]`);
+       // Function to edit a service
+function editService(serviceId, title, cost, image, description) {
+    let selectedImage; // Define selectedImage variable at the function level
 
-            // Create input fields for editing title
-            const titleInput = document.createElement('input');
-            titleInput.type = 'text';
-            titleInput.value = title;
+    const serviceCard = document.querySelector(`[data-id="${serviceId}"]`);
 
-            // Create apply button
-            const applyButton = document.createElement('button');
-            applyButton.textContent = 'Apply';
-            applyButton.addEventListener('click', () => {
-                const newTitle = titleInput.value.trim();
-                if (newTitle !== '') {
-                    const formData = new FormData();
-                    formData.append('title', newTitle);
-                    formData.append('cost', cost);
-                    formData.append('description', description);
+    // Create input fields for editing title and description
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.value = title;
 
-                    // Append image data only if it's present
-                    const imageData = document.getElementById('image').files[0];
-                    if (imageData) {
-                        formData.append('image', imageData);
-                    }
+    const descriptionInput = document.createElement('textarea');
+    descriptionInput.value = description;
 
-                    fetch(`${MY_SERVER}/services/${serviceId}/`, {
-                        method: 'PUT',
-                        body: formData
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Failed to update service');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            fetchServices(); // Reload services after updating
-                        })
-                        .catch(error => {
-                            console.error('Error updating service:', error.message);
-                            if (error.message.includes('Failed to update service')) {
-                                alert('Failed to update service. Please try again later.');
-                            } else {
-                                alert('An unexpected error occurred. Please try again later.');
-                            }
-                        });
+    // Create button to select a new image
+    const selectImageButton = document.createElement('button');
+    selectImageButton.textContent = 'Select New Image';
+    selectImageButton.addEventListener('click', () => {
+        const imageInput = document.createElement('input');
+        imageInput.type = 'file';
+        imageInput.accept = 'image/*';
+        imageInput.addEventListener('change', () => {
+            selectedImage = imageInput.files[0]; // Assign the selected image to selectedImage
+            if (selectedImage) {
+                // Show the filename or any indicator of a selected image
+                console.log('Selected image:', selectedImage.name);
+            }
+        });
+        imageInput.click(); // Trigger click event on hidden file input
+    });
+
+    // Create apply button
+    const applyButton = document.createElement('button');
+    applyButton.textContent = 'Apply';
+    applyButton.addEventListener('click', () => {
+        const newTitle = titleInput.value.trim();
+        const newDescription = descriptionInput.value.trim();
+        if (newTitle !== '') {
+            const formData = new FormData();
+
+            // Append title, cost, and description
+            formData.append('title', newTitle);
+            formData.append('cost', cost);
+            formData.append('description', newDescription);
+
+            // Conditional check for selected image
+            if (selectedImage) {
+                formData.append('image', selectedImage); // Append selected image
+            } else if (!selectedImage && image) {
+                // Append existing image if no new image is selected
+                formData.append('image', image);
+            }
+
+            fetch(`${MY_SERVER}/services/${serviceId}/`, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update service');
+                }
+                return response.json();
+            })
+            .then(data => {
+                fetchServices(); // Reload services after updating
+            })
+            .catch(error => {
+                console.error('Error updating service:', error.message);
+                if (error.message.includes('Failed to update service')) {
+                    alert('Failed to update service. Please try again later.');
                 } else {
-                    alert('Title cannot be empty!');
+                    alert('An unexpected error occurred. Please try again later.');
                 }
             });
-
-            // Replace title with input field and add apply button
-            const titleElement = serviceCard.querySelector('h2');
-            titleElement.textContent = '';
-            titleElement.appendChild(titleInput);
-            titleElement.appendChild(applyButton);
+        } else {
+            alert('Title cannot be empty!');
         }
+    });
+
+    // Replace title and description with input fields and add buttons
+    const titleElement = serviceCard.querySelector('h2');
+    const descriptionElement = serviceCard.querySelector('p');
+    titleElement.textContent = '';
+    descriptionElement.textContent = '';
+    titleElement.appendChild(titleInput);
+    descriptionElement.appendChild(descriptionInput);
+    serviceCard.appendChild(selectImageButton);
+    serviceCard.appendChild(applyButton);
+}
 
         // Function to delete a service
         function deleteService(serviceId) {
