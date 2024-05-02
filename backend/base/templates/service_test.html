@@ -3,23 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Services</title>
+    <title>Services</title>
 </head>
 <body>
-    <h1>All Services</h1>
-    <ul>
-        {% for service in services %}
-            <li>
-                <h2>{{ service.title }}</h2>
-                <p><strong>Cost:</strong> ${{ service.cost }}</p>
-                {% if service.description %}
-                    <p><strong>Description:</strong> {{ service.description }}</p>
-                {% endif %}
-                {% if service.image %}
-                    <img src="{{ service.image.url }}" alt="{{ service.title }}">
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+    <h1>Services</h1>
+    <div id="services-list">
+        <!-- Services will be dynamically added here -->
+    </div>
+
+    <script>
+        const MY_SERVER = 'http://127.0.0.1:8000'
+        // Fetch services data from Django backend
+        fetch(`${MY_SERVER}/services`)
+            .then(response => response.json())
+            .then(data => {
+                const servicesList = document.getElementById('services-list');
+                data.forEach(service => {
+                    const serviceCard = document.createElement('div');
+                    serviceCard.classList.add('service-card');
+
+                    const title = document.createElement('h2');
+                    title.textContent = service.title;
+                    serviceCard.appendChild(title);
+
+                    const image = document.createElement('img');
+                    image.src = service.image;
+                    image.alt = service.title;
+                    serviceCard.appendChild(image);
+
+                    const description = document.createElement('p');
+                    description.textContent = service.description;
+                    serviceCard.appendChild(description);
+
+                    servicesList.appendChild(serviceCard);
+                });
+            })
+            .catch(error => console.error('Error fetching services:', error));
+    </script>
 </body>
 </html>

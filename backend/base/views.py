@@ -15,6 +15,9 @@ from .Serializer import (
 def test_view(request):
     return render(request, 'test.html')
 
+def services_test_view(request):
+    return render(request, 'service_test.html')
+
 @api_view(['GET'])
 def index(request):
     return Response('Hello, welcome to the API!')
