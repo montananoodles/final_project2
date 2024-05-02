@@ -22,17 +22,6 @@ def services_test_view(request):
 def index(request):
     return Response('Hello, welcome to the API!')
 
-# @api_view(['GET'])
-# def getImages(request):
-#     res=[] #create an empty list
-#     for img in PicsPosts.objects.all(): #run on every row in the table...
-#         res.append({"service":img.service,
-#                 "description":img.description,
-#                "image":str( img.image)
-#                 }) #append row by to row to res list
-#     return Response(res) #return array as json response
-
-
 @api_view(['POST'])
 def add_userprofile(request):
     if request.method == 'POST':
@@ -101,7 +90,7 @@ def service_detail(request, pk):
     try:
         service = Service.objects.get(pk=pk)
     except Service.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Service not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ServiceSerializer(service)
@@ -110,8 +99,19 @@ def service_detail(request, pk):
         serializer = ServiceSerializer(service, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        errors = serializer.errors
+        if 'title' in errors:
+            error_message = f"Invalid title: {errors['title'][0]}"
+        elif 'cost' in errors:
+            error_message = f"Invalid cost: {errors['cost'][0]}"
+        elif 'image' in errors:
+            error_message = f"Invalid image: {errors['image'][0]}"
+        elif 'description' in errors:
+            error_message = f"Invalid description: {errors['description'][0]}"
+        else:
+            error_message = "Invalid data"
+        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         service.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
